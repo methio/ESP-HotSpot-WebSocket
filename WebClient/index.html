@@ -6,6 +6,9 @@
     <title>Document</title>
 </head>
 <body>
+    <button id="on">ON light</button>
+    <button id="off">OFF light</button>
+
     <script>
         const wsUri = "ws://192.168.4.1/";
         const websocket = new WebSocket(wsUri)
@@ -27,14 +30,30 @@
             console.log(`RECEIVED: ${JSON.stringify(msg)}`)
         })
 
-        addEventListener('click', e => {
-            counter++
+        // addEventListener('click', e => {
+        //     counter++
+        //     const message = {
+        //         iteration: counter,
+        //         content: "ping",
+        //     }
+        //     websocket.send(JSON.stringify(message))
+        // })
+
+        document.querySelector("#on").addEventListener("click", e => {
             const message = {
-                iteration: counter,
-                content: "ping",
-            }
-            websocket.send(JSON.stringify(message))
-        })
+                pin : 14,
+                action: 1,
+            };
+            websocket.send(JSON.stringify(message));
+        });
+        document.querySelector("#off").addEventListener("click", e => {
+            const message = {
+                pin : 14,
+                action: 0,
+            };
+            websocket.send(JSON.stringify(message));
+        });
+
     </script>
 </body>
 </html>
