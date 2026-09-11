@@ -5,15 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
-<body>
-    <button id="on">ON light</button>
-    <button id="off">OFF light</button>
+<body class="flex column centered">
 
+    <style>
+        body{
+            background-color: #F7F2EB;
+            font-family: monospace;
+        }
+        .container {
+            width: 50%;
+            background-color: #abb5a4;
+            border: solid #8d9687 1px;
+            border-radius: .4em;
+            box-shadow: 0px 0px 8px 5px rgba(63, 67, 61, 0.5);
+            -webkit-box-shadow: 0px 0px 8px 5px rgba(63, 67, 61, 0.5);
+        }
+        .cell {
+            width: 2em;
+            height: 2em;
+        }
+        .flex{display: flex;}
+        .row{flex-direction: row;}
+        .column{flex-direction: column;}
+        .centered{align-items: center;}
+        .space-between{justify-content: space-between; align-content: space-between;}
+        .wrap{flex-wrap: wrap;}
+        .small-gap{gap: 1em;}
+        .small-paddings{padding: .5em;}
+        .paddings{padding: 1em;}        
+    </style>
+
+    <div id="main-container" class="container flex column centered small-gap paddings">
+        <div class="container flex row paddings small-gap">
+            <button id="on">ON light</button>
+            <button id="off">OFF light</button>
+        </div>
+        
+        <div class="container flex column paddings small-gap">
+            <label for="ledX">Choose an X a Y and a color </label>
+            <input type="text" id="ledX" name="ledX" value="4"/>
+            <input type="text" id="ledY" name="ledY" value="4"/>
+            <input type="color" id="ledColor" name="ledColor" value="#e66465" />
+            <button id="ledInfos">update LED panel</button>
+        </div>
+
+        <div class="container flex column paddings small-gap">
+            <p>your grid</p>
+            <div id="color-grid" class="flex row wrap space-between">
+                <!-- dynamic cards -->
+            </div>
+            <button id="reset" class="small-paddings">reset</button>
+            <button id="send-grid" class="small-paddings">send grid</button>
+        </div>        
+    </div>
+    
     <script>
         const wsUri = "ws://192.168.4.1/";
         const websocket = new WebSocket(wsUri)
         let isConnected = false
         let counter = 0
+        let clientID = 9;
 
         websocket.addEventListener("error", e => {
             console.log(`ERROR: ${JSON.stringify(e)}`)
@@ -30,19 +81,11 @@
             console.log(`RECEIVED: ${JSON.stringify(msg)}`)
         })
 
-        // addEventListener('click', e => {
-        //     counter++
-        //     const message = {
-        //         iteration: counter,
-        //         content: "ping",
-        //     }
-        //     websocket.send(JSON.stringify(message))
-        // })
-
         document.querySelector("#on").addEventListener("click", e => {
             const message = {
                 pin : 14,
                 action: 1,
+                targetClientID: 2,
             };
             websocket.send(JSON.stringify(message));
         });
@@ -50,10 +93,62 @@
             const message = {
                 pin : 14,
                 action: 0,
+                targetClientID: 2,
             };
             websocket.send(JSON.stringify(message));
         });
 
+        const hexToRgb = (hex) => {
+            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        // single led
+        document.querySelector("#ledInfos").addEventListener("click", e=>{
+            const ledColors = hexToRgb(document.querySelector("#ledColor").value);
+            const ledX = parseInt(document.querySelector("#ledX").value);
+            const ledY = parseInt(document.querySelector("#ledY").value);
+            const message = {
+                ledX: ledX,
+                ledY: ledY,
+                ledR: ledColors.r,
+                ledG: ledColors.g,
+                ledB: ledColors.b,
+                targetClientID: 3,
+            };
+            websocket.send(JSON.stringify(message));
+        })
+
+        // create grid
+        const grid = document.querySelector("#color-grid");
+        for(let y = 0; y < 8; y+=1){
+            for(let x = 0; x < 8; x+=1){
+                grid.innerHTML+= `
+                <input class="cell" type="color" id="ledColor" name="cell${x}-${y}" value="#e66465" data-x="${x}" data-y="${y}"/>
+                `;
+            }
+        }
+        // send current grid to huzzah32
+        document.querySelector("#send-grid").addEventListener("click", e => {
+            const message = [];
+            const cells = grid.querySelectorAll(".cell");
+            cells.forEach(cell => {
+                const cellColor = hexToRgb(cell.value);
+                message.push({
+                    x:  parseInt(cell.dataset.x),
+                    y:  parseInt(cell.dataset.y),
+                    r: cellColor.r,
+                    g: cellColor.g,
+                    b: cellColor.b,
+                })
+            })
+            websocket.send(JSON.stringify(message));
+            // console.log(message);
+        })
     </script>
 </body>
 </html>

@@ -7,3 +7,27 @@ Working on places with often limited WiFi, the idea behind this project is to ha
 ### Sources
 - https://www.upesy.fr/blogs/tutorials/how-create-a-wifi-acces-point-with-esp32
 - https://shawnhymel.com/1675/arduino-websocket-server-using-an-esp32/
+
+
+--- 
+## How does it works 
+
+Server receives messages from one client and broadcast it to all clients. 
+
+-gif schema connexion-
+
+Todo: 
+- [ ] can send a message to a targeted client by its ID and avoir broadcasting to all.
+- [ ] create example list simple components from kit 
+
+
+## What to do 
+First, make sure all huzzah32 files have the same credentials : 
+```
+const char *ssid = "huzzah32";
+const char *password = "huzzah32";
+```
+
+Use your name to avoid problems in class
+
+To use webClient on your computer, put your laptop wifi to "huzzah32" hotspot and then run liveserver.

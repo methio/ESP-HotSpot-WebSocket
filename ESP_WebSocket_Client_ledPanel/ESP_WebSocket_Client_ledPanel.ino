@@ -1,29 +1,30 @@
 // ESP WebSocket Client
-
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiMulti.h>
 #include <WebSocketsClient.h>
-#include <sensorShieldLib.h>
 #include <ArduinoJson.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_NeoMatrix.h>
+#include <Adafruit_NeoPixel.h>
+#include <Fonts/Picopixel.h> // font mini
 
-#define CLIENT_ID 1
+
+/* ######### CLIENT 3 = panneau led #########  */
+Adafruit_NeoMatrix matrix(8, 8, 21, 
+  NEO_MATRIX_TOP + NEO_MATRIX_RIGHT + 
+  NEO_MATRIX_COLUMNS + NEO_MATRIX_ZIGZAG, 
+  NEO_GRB + NEO_KHZ800);
+
+#define CLIENT_ID 3
 #define PRINT_LOGS false
 
-const char* ssid = "feather32";
-const char* password = "feather32";
+// credentials
+const char* ssid = "huzzah32";
+const char* password = "huzzah32";
 
 WiFiMulti WiFiMulti;
 WebSocketsClient webSocket;
-SensorShield board;
-
-int getClientID() {
-  return CLIENT_ID;
-}
-
-int secondsPassed() {
-	return (millis() / 10000) * 10 ;
-}
 
 void webSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
   switch (type) {
@@ -36,7 +37,7 @@ void webSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
       break;
 
     case WStype_TEXT:
-      {
+      { 
         if(PRINT_LOGS) Serial.printf("[LOG] get text: %s\n", payload);
         JsonDocument doc;
         char raw[length];
@@ -51,7 +52,23 @@ void webSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
           int clientID = doc["clientID"];
           if(clientID != CLIENT_ID) {
             // do something if message from another client
-            Serial.printf("%s\n", payload);
+            // clean screen
+            matrix.fillScreen(0);
+            matrix.show();
+
+            // from https://arduinojson.org/v7/api/jsonarray/
+            JsonArray array = doc.as<JsonArray>();
+            for (JsonObject obj : array) {
+              int x = obj["x"].as<int>(); // make sure value is a int
+              int y = obj["y"].as<int>();
+              int r = obj["r"].as<int>();
+              int g = obj["g"].as<int>();
+              int b = obj["b"].as<int>();
+              Serial.printf("x=%d y=%d r=%d g=%d b=%d\n", x, y, r, g, b);
+              matrix.drawPixel(x, y, matrix.Color(r,g,b));              
+            }
+            matrix.show();
+            // Serial.printf("%s\n", payload);
           }
         }
       }
@@ -88,16 +105,19 @@ void setup() {
   // try ever 5000 again if connection has failed
   webSocket.setReconnectInterval(5000);
 
-  board.init(Serial);
-  board.addSensor("clientID", getClientID);
-  board.addSensor("seconds", secondsPassed);
+  // matrix setup
+  matrix.begin();
+  matrix.setBrightness(10);
+  matrix.fillScreen(0);
+
+  // hello screen
+  matrix.setFont(&Picopixel); 
+  matrix.setTextColor(matrix.Color(0, 255, 0));
+  matrix.setCursor(0, 5);
+  matrix.print("Hi");
+  matrix.show();
 }
 
 void loop() {
   webSocket.loop();
-
-  board.update(false);
-  if(board.hasNewValue == true) {
-    webSocket.sendTXT(board.JSONMessage);
-  }
 }
