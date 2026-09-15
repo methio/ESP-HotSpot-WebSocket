@@ -1,6 +1,28 @@
+![cover image](images/cover.png)
+
 # ESP HotSpot and WebSocket Server + ESP and JS Clients
 
-Working on places with often limited WiFi, the idea behind this project is to have an ESP board like the [Adafruit Feather Huzzah32](https://www.adafruit.com/product/3405) or [Adafruit Feather Huzzah(ESP 8266)](https://www.adafruit.com/product/2821) to create a Wifi hotspot and a WebSocket server that broadcasts all the messages it receives. 
+>[!TIP]
+>You can use this repo/project when adafruit.io doesn't fit to your needs. 
+
+This project turns your huzzah 32 ([Adafruit Feather Huzzah32↗](https://www.adafruit.com/product/3405) or [Adafruit Feather Huzzah(ESP 8266)↗](https://www.adafruit.com/product/2821)) into a **WiFi hotspot** and a **WebSocket server**. The Huzzah32 creates its own WiFi network, and every device connected to that network (other Huzzah32 and computers) can exchange messages in real time via WebSockets.
+
+
+## 💡 Usefuls concepts
+
+### WiFi access point (Hotspot / Access Point)
+Normally, your huzzah 32 connects to an existing WiFi network (like your smartphone hotspot). Here it's the opposite: the huzzah 32 **creates its own WiFi network**, which other devices then connect to. This is called an "access point" (AP) or "hotspot".
+
+### Client / Server
+- The **server** is the program that waits for connections and centralizes the exchanges (here, the huzzah 32 running `ESP_Server`).
+- A **client** is a program that connects to the server to send or receive information (here, the other huzzah 32 boards `ESP_Clients` or a web page running on your laptop `Web_Client`).
+
+### WebSocket
+[Websocket↗](https://github.com/Links2004/arduinoWebSockets) is a communication protocol that keeps a connection **open at all times** between a client and a server, unlike classic HTTP where every exchange requires a new request. This allows instant two-way communication.
+
+
+
+
 
 ⚠️ Chrome now treats `localhost` as an insecure origin unless using a HTTPS certificate and will block usage of websockets. You can still modify this behavior by activating this chrome flag: `chrome://flags/#unsafely-treat-insecure-origin-as-secure`
 
