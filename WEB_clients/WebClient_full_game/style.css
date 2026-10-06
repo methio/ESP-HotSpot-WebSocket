@@ -1,0 +1,75 @@
+
+* {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+@font-face {
+    font-family: DepartureMono;
+    src: url("assets/DepartureMono-Regular.otf");
+}
+canvas{
+    display: block;
+}
+
+#game-stage{
+    position: relative;
+    width: 100%;
+    height: 600px;
+    flex: 0 0 600px;
+}
+
+body{
+    width: 100vw;
+    height: 100vh;
+    background-color: #472812;
+    color:#3B626F;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    font-family: DepartureMono;
+}
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;            /* derrière le canvas ; voir plus bas pour l'effet par-dessus */
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.4' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.082  0 0 0 0 0.090  0 0 0 0 0.047  1.6 0 0 0 -0.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 300px 300px;
+}
+
+
+h1{
+    padding: 2em;
+}
+
+.game-title-overlay{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+    transform: translate(-50%, -50%);
+}
+
+#controls{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 3em;
+
+    button{
+        background-color: #3B626F;
+        border: none;
+        color: rgb(207, 233, 243);
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        cursor: pointer;
+    }
+}

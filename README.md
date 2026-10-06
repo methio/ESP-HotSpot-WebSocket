@@ -139,10 +139,35 @@ On your computer, go to your WiFi settings and connect to the network created by
 ### 8️⃣ Test the exchanges
 Send a message from one client (button, web page...) and check that it's received and rebroadcast to all other connected clients.
 
+
+## Trucs spéciaux
+
+<!-- Un client peut envoyer à tous les autres clients ou seulement un seul. 
+Pour envoyer à un seul client on ajoute deux clés dans on message : 
+``` cpp
+// to send a message to client 1 only
+doc["to"] = 1;
+``` -->
+
+On envoie un message avec la clé `client_id`pour indiquer qui envoie le message. Le serveur envoie le message à tout le monde, donc donner la clé client_id permet de filtrer les messages qu'on reçoit et on peut s'assurer de ne pas lire ce qu'on vient d'envoyer
+
+```
+
+    client1 -----> serveur --------> client 2
+     ^                      |   |-> client 3
+     |----------------------| 
+
+```
+
+
 ## Troubleshooting
 ⚠️ Chrome now treats `localhost` as an insecure origin unless using a HTTPS certificate and will block usage of websockets. You can still modify this behavior by activating this chrome flag: `chrome://flags/#unsafely-treat-insecure-origin-as-secure`
 
 ## Sources
+
+> [!IMPORTANT]
+> Special thanks to makio135 
+
 - https://www.upesy.fr/blogs/tutorials/how-create-a-wifi-acces-point-with-esp32
 - https://shawnhymel.com/1675/arduino-websocket-server-using-an-esp32/
 
