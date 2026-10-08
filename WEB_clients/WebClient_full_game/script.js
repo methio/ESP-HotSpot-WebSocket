@@ -1,22 +1,22 @@
-// ### CLIENT VARIABLES ####
-const wsUri = "ws://192.168.4.1/";
-const websocket = new WebSocket(wsUri);
-let isConnected = false;
-let clientID = 9;
-let data;
+// // ### CLIENT VARIABLES ####
+// const wsUri = "ws://192.168.4.1/";
+// const websocket = new WebSocket(wsUri);
+// let isConnected = false;
+// let clientID = 9;
+// let data;
 
-websocket.addEventListener("error", e => {
-    console.log(`ERROR: ${JSON.stringify(e)}`);
-})
+// websocket.addEventListener("error", e => {
+//     console.log(`ERROR: ${JSON.stringify(e)}`);
+// })
 
-websocket.addEventListener("open", () => {
-    console.log("CONNECTED");
-    isConnected = true;
-})
+// websocket.addEventListener("open", () => {
+//     console.log("CONNECTED");
+//     isConnected = true;
+// })
 
-websocket.addEventListener("message", e => {
-    data = JSON.parse(e.data);    
-})
+// websocket.addEventListener("message", e => {
+//     data = JSON.parse(e.data);    
+// })
 
 
 // #### GAMES VARIABLES ####
@@ -34,7 +34,7 @@ let grassesSkin;
 let trees = [];
 let treesSkin;
 let enemies = [];
-let enemiesSkin;
+let enemiesSkin = {};
 let player;
 let playerSkins = [];
 let currentFrame = 0;
@@ -49,7 +49,7 @@ async function setup() {
     rectMode(CENTER);
     imageMode(CENTER);
 
-    font = await loadFont('/assets/DepartureMono-Regular.otf');
+    font = await loadFont('assets/DepartureMono-Regular.otf');
 
     // load skins
     for(let i = 0; i <= 6; i++){
@@ -58,10 +58,10 @@ async function setup() {
             player = new Player(cs.w/2, cs.h - 200);
             light  = new Light(player.x, player.y);
         }
-    } 
+    }
+    await loadEnemySkins(); 
     treesSkin   = await loadImage(`assets/tree.png`);
     grassesSkin = await loadImage("assets/grass.png");
-    enemiesSkin = await loadImage("assets/kirby.png");
 
     // welcome screen
     generateLandscape();
@@ -93,9 +93,12 @@ function draw() {
                 enemy.update_position();
                 let collision = enemy.detect_collision(player); //, true, index);
                 if(collision === "direct_collision"){
+                    enemy.display(isEven(currentFrame), "b");
                     currentScene = "lose"
                 }else if(collision === "imminent_collision"){
-                    
+                    enemy.display(isEven(currentFrame), "b");
+                }else{
+                    enemy.display(isEven(currentFrame), "a");
                 }
                 if(enemy.check_overflow_y()){
                     enemies.splice(index, 1);
@@ -166,7 +169,7 @@ setInterval(()=>{
     if(currentScene === "game"){
         enemies.push(new Enemy(random(100, cs.w-100), -10, enemiesSkin))
     }    
-}, treeSpawnSpeed*3);
+}, treeSpawnSpeed/10);
 
 
 
@@ -209,4 +212,26 @@ const resetAll = () => {
     trees = [];
     enemies = [];
     grasses = [];
+}
+
+const loadEnemySkins = async() => {
+    enemiesSkin = {
+        halo: {
+            a: await loadImage("assets/enemy/halo_1.png"),
+            b: await loadImage("assets/enemy/halo_2.png")
+        },
+        base: {
+            a: await loadImage("assets/enemy/base_1.png"),
+            b: await loadImage("assets/enemy/base_2.png")
+        },
+        eye: {
+            a: await loadImage("assets/enemy/eye_1.png"),
+            b: await loadImage("assets/enemy/eye_2.png"),
+            c: await loadImage("assets/enemy/eye_2.png")
+        }
+    };
+}
+
+const isEven = (n) => {
+   return n % 2 == 0 ? "a" : "b";
 }

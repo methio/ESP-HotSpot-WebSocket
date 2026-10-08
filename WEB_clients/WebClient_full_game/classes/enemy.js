@@ -20,7 +20,17 @@ class Enemy{
     update_position(){
         // balancier smooth du méchant en X
         this.update_balancier(); 
-        image(this.skin, this.x, this.y, this.w, this.h)
+        // image(this.skin, this.x, this.y, this.w, this.h)
+    }
+
+    display(frame, angryLevel){
+        const e = enemiesSkin;
+        image(e.halo[angryLevel], this.x, this.y, this.w, this.h);
+        image(e.base[frame], this.x, this.y, this.w, this.h);
+        image(e.eye[angryLevel], this.x, this.y, this.w, this.h);
+
+        
+        // image(this.frame, this.x, this.y, this.w, this.h)
     }
 
     detect_collision(p, debug = false, index = 0){

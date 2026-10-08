@@ -1,0 +1,47 @@
+:root{
+    --bg:#d3ecee;
+    --pan:#ebf4f4;
+    --off:#d3dce0;
+    --ink:#1c2a33;
+    --mut:#5d6f7a;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:18px;background:var(--bg);color:var(--ink);font:15px "Avenir Next","Segoe UI",system-ui,sans-serif}
+h1{font-size:20px;font-weight:650;margin:0 0 14px}
+.bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.bar label{display:flex;gap:6px;align-items:center;color:var(--mut)}
+button,input{font:inherit;color:inherit}
+button{
+    border:0;
+    border-radius:4px;
+    padding:9px 16px;
+    background:var(--off);
+    cursor:pointer;
+}
+button:focus-visible,input:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+#play{background:var(--ink);color:#fff;font-weight:600;min-width:96px}
+#play.on{background:#b3261e}
+input[type=number]{
+    width:74px;
+    border:1px solid var(--off);
+    background:#fff;
+    border-radius:4px;
+    padding:6px 8px;
+}
+.grid{background:var(--pan);border-radius:12px;padding:12px;overflow-x:auto}
+.row{display:flex;align-items:center;gap:12px;margin:6px 0;min-width:780px}
+.lab{width:190px;flex:none;display:flex;align-items:center;gap:8px}
+.lab i{width:12px;height:12px;border-radius:50%;background:var(--c)}
+.lab b{font-weight:600;width:58px}
+.steps{display:flex;gap:4px;flex:1}
+.on{background:var(--c)}
+/* .mesure.cur{box-shadow:inset 0 0 0 3px var(--ink)} */
+#st{color:var(--mut);font-size:13px;margin-top:10px;min-height:1.2em}
+.mesure.cur { box-shadow: inset 0 0 0 3px #1c2a33; }
+.temps{display: flex;flex-direction: row;gap:2em;}
+button.mesure{
+    aspect-ratio: 1 / 1;   /* carré : largeur = hauteur */
+    width: 2.5rem;         /* taille de base, modifiez-la à votre goût */
+    padding: 0;
+    margin: .2em;
+}

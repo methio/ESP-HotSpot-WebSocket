@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="style.css" rel="stylesheet" />
+    <title>piezo rythm</title>
+</head>
+<body>
+<h1>piezo rythm</h1>
+
+<div class="bar">
+    <button id="play">▶️ Play</button>
+    <label>
+        Tempo 
+        <input 
+            id="bp" 
+            type="number" 
+            min="30" 
+            max="300" 
+            value="120"
+        > 
+        BPM
+    </label>
+    <button id="clr">Clear</button>
+</div>
+
+<div class="grid" id="grid"></div>
+<!-- <div id="st" role="status"></div> -->
+
+<script>
+
+    const wsUri = "ws://192.168.4.1/";
+        const websocket = new WebSocket(wsUri)
+        let isConnected = false
+        let counter = 0
+        let clientID = 9;
+
+        websocket.addEventListener("error", e => {
+            console.log(`ERROR: ${JSON.stringify(e)}`)
+        })
+
+        websocket.addEventListener("open", () => {
+            console.log("CONNECTED")
+            isConnected = true
+        })
+
+        websocket.addEventListener("message", e => {
+            const msg = JSON.parse(e.data)
+            counter = msg.iteration
+            console.log(`RECEIVED: ${JSON.stringify(msg)}`)
+        })
+
+    // variables
+    const nbTemps = 4;
+    const nbMesures = 4;
+    const mesuresT = nbTemps * nbMesures;
+
+    const nbInstruments = 4;
+    const couleurs = ['#c9972b','#1f8a8a','#d1495b','#4b5fc4'];
+
+    const randomFreq = (minimum = 20, maximum = 5000) => {
+        return Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
+    }
+
+    let bpm=120;
+    let running=false;
+    let timer=null
+    let pos=0;
+
+    const $=id=>document.getElementById(id);
+
+    // générer la grille dynamiquement
+    const grid = document.querySelector("#grid");
+    for(let t=0; t<nbInstruments; t++){
+
+        let rowContent = `<div class="row" style="--c:${couleurs[t]}"> 
+                            <div class="lab">
+                                <i></i>
+                                <b>Piezo ${t+1}</b>
+                                <input type="number" min="20" max="5000" value="${randomFreq()}" aria-label="Fréquence piezo ${t+1} en Hz"> 
+                                Hz
+                            </div>                            
+            `;
+        let temps = ``;
+        for(let i = 0; i < nbTemps; i++){
+            let mesures = `<div class="mesures" data-mesures="${i}">`;
+            for(let u = 0; u < nbMesures; u++){
+                mesures+= `<button 
+                            class="mesure" 
+                            data-row="${t}" 
+                            data-col="${i}"
+                        ></button>`;
+            }
+            temps+= `${mesures}</div>`
+        }
+        rowContent += `<div class="temps">${temps}</div>`;
+        rowContent += `</div>`;
+        grid.innerHTML += rowContent; // add to the page
+    }
+
+    const buttons = document.querySelectorAll("button.mesure");
+    buttons.forEach((b,i)=>{
+        b.addEventListener("click", (e)=>{
+            b.classList.toggle('on');
+            console.log(b)
+        });
+    })
+
+    const creerMessage = () => ({
+        bpm,
+        lecture: running,
+        dureePasMs: 60000 / bpm / nbMesures,
+        pistes: [...grid.querySelectorAll('.row')].map((row, t) => ({
+            piezo: t + 1,
+            frequence: Number(row.querySelector('input').value),
+            pas: [...row.querySelectorAll('button.mesure')].map(b => Number(b.classList.contains('on')))
+        }))
+    });
+
+    const envoyer = (message) => {
+        // à brancher : WebSocket, fetch, MQTT...
+        console.log(message);
+    };
+
+    // ---- curseur de lecture ----
+    const dureePas = () => 60000 / bpm / nbMesures;
+
+    const avancer = () => {
+        buttons.forEach((b, i) => b.classList.toggle('cur', i % mesuresT === pos));
+        pos = (pos + 1) % mesuresT;
+    };
+
+    const setLecture = (etat) => {
+        running = etat;
+        clearInterval(timer);
+        buttons.forEach(b => b.classList.remove('cur'));
+        if (running) {
+            pos = 0;
+            avancer();
+            timer = setInterval(avancer, dureePas());
+        }
+        document.querySelector('#play').textContent = running ? '⏸️ Pause' : '▶️ Play';
+    };
+
+    document.querySelector('#play').addEventListener('click', () => {
+        setLecture(!running);
+        const message = creerMessage();
+        websocket.send(JSON.stringify(message));
+    });
+
+    // met à jour bpm (et le rythme du curseur si la lecture est en cours)
+    document.querySelector('#bp').addEventListener('input', (e) => {
+        bpm = Math.min(300, Math.max(30, Number(e.target.value) || 120));
+        if (running) {
+            clearInterval(timer);
+            timer = setInterval(avancer, dureePas());
+        }
+    });   
+    
+    
+
+    document.querySelector('#clr').addEventListener('click', ()=>{
+        buttons.forEach(b => b.classList.remove('on'));
+    });
+
+
+    
+        
+
+    </script>
+</body>
+</html>
